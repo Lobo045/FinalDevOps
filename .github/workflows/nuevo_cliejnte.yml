@@ -1,0 +1,43 @@
+name: Client Addition Workflow
+
+on:
+  push:
+    branches:
+      - main  # Adjust the branch name if your main branch is different
+
+jobs:
+  notify_on_client_addition:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8  # Adjust the Python version if needed
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt  # If you have any dependencies
+
+    - name: Run script to check for new client files
+      run: |
+        python your_script.py check_new_clients
+
+    - name: Commit and push to the 'request' branch if new clients found
+      if: steps.your_script.outputs.new_clients == 'true'
+      run: |
+        git checkout -b request
+        git add clients_data/*
+        git commit -m "Add new clients"
+        git push origin request
+
+    - name: Send notification
+      if: steps.your_script.outputs.new_clients == 'true'
+      run: |
+        # Add your notification command or service here
+        echo "New clients added! Check the 'request' branch."
+
