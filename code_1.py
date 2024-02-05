@@ -55,10 +55,26 @@ class ClientManager:
 if __name__ == "__main__":
     manager = ClientManager()
 
-    # Create a new client
-    manager.create_client("John Doe")
+    while True:
+        print("\nOptions:")
+        print("1. Crear clientes")
+        print("2. Editar cilentes")
+        print("3. Borrar clientes")
+        print("4. Lista de clientes")
+        print("5. Salir")
 
-    # Edit an existing client
-    manager.edit_client("John Doe", new_name="John Smith", new_description="A new description for John Smith")
+        choice = input("Elija una obcion (1-5): ")
 
-    manager.delete_client("John Smith")
+        if choice == '1':
+            manager.create_client()
+        elif choice == '2':
+            manager.edit_client()
+        elif choice == '3':
+            manager.delete_client()
+        elif choice == '4':
+            manager.list_clients()
+        elif choice == '5':
+            print("Saliendo de la aplicacion.")
+            break
+        else:
+            print("Favor de elejir un numero entre el 1 y el 5")
