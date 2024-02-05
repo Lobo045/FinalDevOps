@@ -1,7 +1,6 @@
 import os
 
 class ClientManager:
-    #Creamos el codigo para añadir clientes
     def __init__(self, data_folder='clients_data'):
         self.data_folder = data_folder
         self.ensure_data_folder_exists()
@@ -10,17 +9,20 @@ class ClientManager:
         if not os.path.exists(self.data_folder):
             os.makedirs(self.data_folder)
 
-    def create_client(self, client_name):
+    def create_client(self):
+        client_name = input("Ingrese el nombre del cliente: ")
         client_file_path = os.path.join(self.data_folder, f'{client_name}.txt')
 
         if not os.path.exists(client_file_path):
             with open(client_file_path, 'w') as client_file:
                 client_file.write(f"Client Name: {client_name}\nDescription: ")
+            print(f"The client '{client_name}' has been created.")
 
-            print(f"El cliente '{client_name}' ha sido creado")
+    def edit_client(self):
+        client_name = input("Enter client name to edit: ")
+        new_name = input("Enter new client name (press Enter to keep the same): ") or client_name
+        new_description = input("Enter new description (press Enter to keep the same): ")
 
-    #Creamos el codigo para editar clientes
-    def edit_client(self, client_name, new_name=None, new_description=None):
         client_file_path = os.path.join(self.data_folder, f'{client_name}.txt')
 
         if os.path.exists(client_file_path):
@@ -29,8 +31,7 @@ class ClientManager:
 
             for i in range(len(lines)):
                 if lines[i].startswith("Client Name:"):
-                    if new_name:
-                        lines[i] = f"Client Name: {new_name}\n"
+                    lines[i] = f"Client Name: {new_name}\n"
                     if new_description:
                         lines[i + 1] = f"Description: {new_description}\n"
 
@@ -38,32 +39,44 @@ class ClientManager:
                 client_file.writelines(lines)
 
             # Rename the file if the name is changed
-            if new_name and new_name != client_name:
+            if new_name != client_name:
                 new_client_file_path = os.path.join(self.data_folder, f'{new_name}.txt')
                 os.rename(client_file_path, new_client_file_path)
+                print(f"The client '{client_name}' has been edited and renamed to '{new_name}'.")
+            else:
+                print(f"The client '{client_name}' has been edited.")
 
-    #Codigo para borrar clientes
-    def delete_client(self, client_name):
+        else:
+            print(f"The client '{client_name}' does not exist.")
+
+    def delete_client(self):
+        client_name = input("Enter client name to delete: ")
         client_file_path = os.path.join(self.data_folder, f'{client_name}.txt')
 
         if os.path.exists(client_file_path):
             os.remove(client_file_path)
-            print(f"El cliente '{client_name}' ha sido borrado.")
+            print(f"The client '{client_name}' has been deleted.")
         else:
-            print(f"El cliente '{client_name}' no existe.")
+            print(f"The client '{client_name}' does not exist.")
+
+    def list_clients(self):
+        print("List of clients:")
+        for file_name in os.listdir(self.data_folder):
+            if file_name.endswith(".txt"):
+                print(file_name[:-4]) 
 
 if __name__ == "__main__":
     manager = ClientManager()
 
     while True:
         print("\nOptions:")
-        print("1. Crear clientes")
-        print("2. Editar cilentes")
-        print("3. Borrar clientes")
-        print("4. Lista de clientes")
-        print("5. Salir")
+        print("1. Create clients")
+        print("2. Edit clients")
+        print("3. Delete clients")
+        print("4. List clients")
+        print("5. Exit")
 
-        choice = input("Elija una obcion (1-5): ")
+        choice = input("Choose an option (1-5): ")
 
         if choice == '1':
             manager.create_client()
@@ -74,7 +87,7 @@ if __name__ == "__main__":
         elif choice == '4':
             manager.list_clients()
         elif choice == '5':
-            print("Saliendo de la aplicacion.")
+            print("Exiting the application.")
             break
         else:
-            print("Favor de elejir un numero entre el 1 y el 5")
+            print("Please choose a number between 1 and 5.")
