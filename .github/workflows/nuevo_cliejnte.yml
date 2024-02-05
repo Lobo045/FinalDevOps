@@ -19,7 +19,18 @@ jobs:
           for file in $added_files; do
             if [[ $file == *.txt ]]; then
               echo "New text file found: $file"
-              hub pull-request -b main -h request -m "Automatic Pull Request: New text file added"
+
+              # Set up the repository details
+              repo_name=$(basename $(pwd))
+              repo_owner=$(echo $GITHUB_REPOSITORY | cut -d '/' -f1)
+
+              # Create a pull request using GitHub API
+              curl -X POST \
+                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                -H "Accept: application/vnd.github.v3+json" \
+                "https://api.github.com/repos/$repo_owner/$repo_name/pulls" \
+                -d '{"title": "Automatic Pull Request: New text file added", "head": "request", "base": "main", "body": "Automatic Pull Request created by GitHub Actions."}'
+
               break
             fi
           done
