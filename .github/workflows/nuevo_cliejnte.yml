@@ -1,12 +1,14 @@
-name: Merge Request
+name: Auto Merge PR
 
 on:
-  push:
-    branches:
-      - request
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 jobs:
-  merge-request:
+  auto-merge:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,14 +22,22 @@ jobs:
         for file in $changed_files; do
           if [[ $file == *.txt ]]; then
             echo "New text file found: $file"
-            echo "Merging request branch into main branch"
+            pr_number=$(echo "${{ github.event.before }}" | sed 's/refs\/heads\/pull\///')
+            echo "Approving and merging the pull request"
             
-            # Assuming your main branch is 'main', change it if necessary
-            git checkout main
-            git merge request --no-ff --no-edit
-            git push origin main
-            
+            # Approve the pull request
+            curl -X POST \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/${{ github.repository }}/pulls/${pr_number}/reviews" \
+              -d '{"event": "APPROVE"}'
+
+            # Merge the pull request
+            curl -X PUT \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/${{ github.repository }}/pulls/${pr_number}/merge"
+
             echo "Merge complete"
           fi
         done
-
