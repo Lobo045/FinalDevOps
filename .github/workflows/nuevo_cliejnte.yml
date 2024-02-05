@@ -1,43 +1,33 @@
-name: Client Addition Workflow
+name: Merge Request
 
 on:
   push:
     branches:
-      - main  # Adjust the branch name if your main branch is different
+      - request
 
 jobs:
-  notify_on_client_addition:
+  merge-request:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8  # Adjust the Python version if needed
-
-    - name: Install dependencies
+    - name: Check for new text files
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt  # If you have any dependencies
+        changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
 
-    - name: Run script to check for new client files
-      run: |
-        python your_script.py check_new_clients
-
-    - name: Commit and push to the 'request' branch if new clients found
-      if: steps.your_script.outputs.new_clients == 'true'
-      run: |
-        git checkout -b request
-        git add clients_data/*
-        git commit -m "Add new clients"
-        git push origin request
-
-    - name: Send notification
-      if: steps.your_script.outputs.new_clients == 'true'
-      run: |
-        # Add your notification command or service here
-        echo "New clients added! Check the 'request' branch."
+        for file in $changed_files; do
+          if [[ $file == *.txt ]]; then
+            echo "New text file found: $file"
+            echo "Merging request branch into main branch"
+            
+            # Assuming your main branch is 'main', change it if necessary
+            git checkout main
+            git merge request --no-ff --no-edit
+            git push origin main
+            
+            echo "Merge complete"
+          fi
+        done
 
